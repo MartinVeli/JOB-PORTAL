@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>💼 Job Portal</h1>
+        <nav id="menu"></nav>
+    </header>
+
+    <div class="job-container" id="job"></div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        const menu = document.getElementById("menu");
+
+        if (user) {
+            menu.innerHTML =
+                `<a href="index.html">Home</a>
+                 <a href="#" onclick="logout()">Logout</a>`;
+        }
+
+        else {
+            menu.innerHTML =
+                `<a href="index.html">Home</a>
+                 <a href="login.html">Login</a>
+                 <a href="register.html">Register</a>`;
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+
+        fetch(`http://localhost:3000/jobs/${id}`)
+            .then(res => res.json())
+            .then(job => {
+                document.getElementById("job").innerHTML = `
+                <div class="job-card">
+                    <img src="./${job.image}" class="job-image">
+
+                    <div class="job-info">
+                        <h2>${job.title}</h2>
+                        <p class="salary">💰 $${job.salary}</p>
+
+                        <h3>Description</h3>
+                        <p class="description">${job.fullDescription}</p>
+
+                        <button class="apply-btn" onclick="applyJob()">Apply Now</button>
+                    </div>
+                </div>
+            `;
+            })
+            .catch(() => {
+                document.getElementById("job").innerHTML = "<h2>Job not found</h2>";
+            });
+
+        function applyJob() {
+            const user = JSON.parse(localStorage.getItem("user"));
+
+            if (!user) {
+                alert("You must login first!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            fetch("http://localhost:3000/apply", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    job_id: id
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Applied successfully!");
+                    } else {
+                        alert(data.message || "Error applying!");
+                    }
+                })
+                .catch(() => {
+                    alert("Server error!");
+                });
+        }
+    </script>
+    <script>
+        
+    </script>
+</body>
+</html>

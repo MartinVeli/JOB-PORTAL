@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <h1>💼 Job Portal</h1>
+        <nav id="menu"></nav>
+    </header>
+
+
+    <div id="jobsContainer" class="jobs"></div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        const menu = document.getElementById("menu");
+
+        if (user) {
+            menu.innerHTML = 
+               `<a href="index.html">Home</a>
+                <a href="#" onclick="logout()">Logout</a>`;
+        }
+
+        else {
+            menu.innerHTML = 
+               `<a href="index.html">Home</a>
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>`;
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        fetch("http://localhost:3000/jobs")
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById("jobsContainer");
+
+                data.forEach(job => {
+                    container.innerHTML += `
+                            <div class="card">
+                                <img src="${job.image}">
+                                <h3>${job.title}</h3>
+                                <p>${job.description}</p>
+                                <p class="salary">💰 $${job.salary}</p>
+                                <a href="job.html?id=${job.id}">View Details</a>
+                            </div>
+                            `;
+                });
+            });
+        
+            
+    </script>
+</body>
+</html>
